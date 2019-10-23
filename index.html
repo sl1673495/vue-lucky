@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link rel="stylesheet" href="css/lucky.css" rel="stylesheet" />
+    <link href="./reset.css" rel="stylesheet" type="text/css" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      [v-cloak] {
+        display: none;
+      }
+
+      .name-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 140px;
+        font-size: 48px;
+        color: purple;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div v-cloak id="app">
+      <div class="lucky-container">
+        <div class="lucky-head">
+          <div class="inner-wrapper">
+            <div class="luckyName">
+              <ul ref="list" class="name-list">
+                <li class="name-item" v-if="shouldShowUnknown">
+                  ? ? ?
+                </li>
+                <li ref="listItem" class="name-item" v-for="name in names">
+                  {{ name }}
+                </li>
+              </ul>
+            </div>
+            <div class="action-btn-group">
+              <span
+                v-if="!running"
+                :class="['start-btn', 'action-btn', mousedown&&'mousedown']"
+                @mousedown="actionOnMousedown"
+                @mouseup="actionOnMouseup(start)"
+              >
+              </span>
+              <span
+                v-else
+                :class="['stop-btn', 'action-btn', stopping&&'stopping', mousedown&&'mousedown']"
+                @mousedown="actionOnMousedown"
+                @mouseup="actionOnMouseup(stop)"
+              >
+              </span>
+            </div>
+            <!-- <div classs="lucky-dogs-list">
+              <span v-if="luckyNames.length">中奖名单：{{luckyNames.join('、')}}</span>
+            </div> -->
+          </div>
+        </div>
+        <div class="lucky-body">
+          <div class="lucky-content"></div>
+        </div>
+      </div>
+
+      <!-- <button v-if="!running" @click="start">开始抽奖</button>
+      <button :disabled="stopping" v-else @click="stop">停止</button> -->
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+      // 需要手动维护的一些配置
+      const config = {
+        // 列表单项高度
+        listItemHeight: 140,
+        // 字体大小
+        fontSize: 76,
+        // 点击停止后 每个速度会运行interval毫秒后进行下一个速度
+        // 按照这些速度滚动完后 才会停留再中奖的人身上
+        speeds: insureLastSpeed(getSpeeds()),
+        // speeds中每个速度运行的毫秒数
+        interval: 100,
+      }
+      const names = generateNames()
+
+      const initialStore = {
+        y: 0,
+        currentSpeed: config.speeds[0],
+        stop: false,
+      }
+      let store = deepClone(initialStore)
+
+      const setSpeed = speed => {
+        store.currentSpeed = speed
+      }
+
+      const stopRun = () => {
+        store.stop = true
+      }
+
+      new Vue({
+        el: '#app',
+        data() {
+          return {
+            running: false,
+            stopping: false,
+            luckyNames: [],
+            names: [],
+            mousedown: false,
+          }
+        },
+        methods: {
+          actionOnMousedown() {
+            if (!this.stopping || !this.running) {
+              this.mousedown = true
+            }
+          },
+          actionOnMouseup(action) {
+            if (!this.stopping || !this.running) {
+              this.mousedown = false
+              action()
+            }
+          },
+          getShuffledNames() {
+            const shuffledNames = shuffle(names)
+            const restNames = shuffledNames.filter(
+              name => !this.luckyNames.includes(name)
+            )
+            this.names = restNames
+          },
+          setListStyle(key, value) {
+            const { list } = this.$refs
+            const { style } = list
+            style[key] = value
+          },
+          setListY(y) {
+            store.y = y
+            this.setListStyle('transform', `translateY(${y}px)`)
+          },
+          start() {
+            // 将transformY重置为0
+            this.setListY(0)
+            // 重新获得随机名单
+            this.getShuffledNames()
+            this.running = true
+
+            const { listItemHeight, fontSize } = config
+            const { names, setListStyle, setListY } = this
+            const { length } = this.names
+            const listHeight = length * listItemHeight
+            // 到达临界值后重置y
+            const limit = listHeight
+            // 重置的值 应该是第一个名字在滚动区域的最底部
+            const resetY = listItemHeight / 2 + fontSize / 2
+            const loop = () => {
+              const raf = requestAnimationFrame(() => {
+                setListY(store.y - store.currentSpeed)
+                if (store.y <= -limit) {
+                  setListY(resetY)
+                }
+                if (store.stop) {
+                  if (
+                    // resetY的值是大于0的 这种情况应该继续滚动
+                    store.y <= 0 &&
+                    // 正好滚动到某个名字的中心
+                    Math.abs(store.y % listItemHeight) === 0
+                  ) {
+                    this.onRunEnd()
+                    return
+                  } else {
+                    loop()
+                  }
+                } else {
+                  loop()
+                }
+              })
+            }
+            loop()
+          },
+          stop() {
+            this.stopping = true
+            // this.running = false
+            this.runSpeeds(config.speeds)
+          },
+          runSpeeds(speeds) {
+            const [speed, ...restSpeeds] = speeds
+            setSpeed(speed)
+
+            if (restSpeeds.length) {
+              setTimeout(() => {
+                this.runSpeeds(restSpeeds)
+              }, config.interval)
+            } else {
+              stopRun()
+            }
+          },
+          // 抽奖结束
+          onRunEnd() {
+            const { y } = store
+            // 中奖人的数组下标
+            const luckyIndex = Math.abs(y / config.listItemHeight)
+            this.luckyNames.push(this.names[luckyIndex])
+            this.reset()
+          },
+          // 重置一些标志位状态
+          reset() {
+            this.running = false
+            this.stopping = false
+            store = deepClone(initialStore)
+          },
+        },
+        computed: {
+          shouldShowUnknown() {
+            return !this.running && !this.stopping && !this.luckyNames.length
+          },
+        },
+      })
+
+      function getSpeeds() {
+        const initial = 50
+        const speeds = []
+        for (let i = initial; i > 0; i--) {
+          speeds.push(i)
+        }
+        return speeds
+      }
+
+      function generateNames() {
+        return new Array(50).fill(null).map((v, i) => `test${i}`)
+      }
+
+      // 数组乱序
+      function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min)
+      }
+
+      function shuffle(arr) {
+        let _arr = arr.slice()
+        for (let i = 0; i < _arr.length; i++) {
+          let j = getRandomInt(0, i)
+          let t = _arr[i]
+          _arr[i] = _arr[j]
+          _arr[j] = t
+        }
+        return _arr
+      }
+
+      function insureLastSpeed(speeds) {
+        // 确保speeds数组最后一个速度是1 否则计算停止时无法停留到准确位置
+        if (speeds.slice(-1) !== 1) {
+          speeds.push(1)
+        }
+        return speeds
+      }
+
+      function deepClone(val) {
+        return JSON.parse(JSON.stringify(val))
+      }
+      
+    </script>
+  </body>
+</html>

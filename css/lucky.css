@@ -1,0 +1,163 @@
+html, body {
+  padding: 0;
+  margin: 0;
+} 
+
+.hidden {
+  display: none !important;
+}
+
+.lucky-container {
+  width: 100%;
+  min-width: 800px;
+}
+.lucky-head {
+  display: flex;
+  justify-content: center;
+  height: 709px;
+  width: 100%;
+  padding-top: 52px;
+  background: url('../assets/lucky-head-bg.jpg') no-repeat center/cover;
+}
+.lucky-head .inner-wrapper {
+  display: flex;
+  justify-content: center;
+  height: 658px;
+  width: 100%;
+  max-width: 1366px;
+  background: url('../assets/lucky-head-main.png') no-repeat center/cover;
+}
+
+.lucky-body {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 1563px;
+  background: #6a1d7d;
+}
+
+.lucky-content {
+  width: 100%;
+  max-width: 1366px;
+  height: 1503px;
+  margin-top: 60px;
+  background: url('../assets/lucky-content-bg.jpg') no-repeat center/cover;
+}
+
+.c-lucky {
+	background-image: url(../assets/background.png);
+	background-size: 650px;
+	height: 658px;
+	width: 552px;
+	background-repeat: no-repeat;
+	position: relative;
+	margin: auto;
+	z-index: 99;
+}
+
+.luckyName {
+  width: 542px;
+  height: 140px;
+  margin-top: 344px;
+  position: relative;
+  display: inline-block;
+  font-size: 76px;
+  font-weight: 800;
+  line-height: 76px;
+  overflow: hidden;
+  text-align: center;
+  color: #9908F7;
+}
+
+.action-btn-group {
+  position: absolute;
+  top: 546px;
+  width: 544px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.action-btn-group .action-btn {
+  margin-left: -14px;
+  display: inline-block;
+  width: 222px;
+  height: 59px;
+}
+
+.action-btn-group .action-btn.mousedown {
+  margin-top: 10px;
+}
+
+.action-btn-group .action-btn.start-btn {
+  background: url('../assets/start-btn.png') no-repeat center/contain;
+}
+
+.action-btn-group .action-btn.stop-btn {
+  background: url('../assets/stop-btn.png') no-repeat center/contain;
+}
+.action-btn-group .action-btn.stop-btn.stopping {
+  cursor: not-allowed;
+}
+
+
+.actionBtn {
+	width: 25px;
+	height: 85px;
+	background-color: transparent;
+	border: none;
+	background-image: url(../assets/action.png);
+	background-repeat: no-repeat;
+	background-size: 25px;
+	outline: none;
+	position: absolute;
+	z-index: 0;
+	top: 290px;
+	right: 138px;
+
+}
+
+.stopBtn {
+	width: 294px;
+	height: 54px;
+	position: absolute;
+	top: 409px;
+	left: 203px;
+	border-radius: 20px;
+	border: none;
+	background-color: transparent;
+	outline: none;
+	-moz-outline-radius: 20px;
+	-moz-outline-radius: 20px;
+	font-size: 40px;
+	color: white;
+}
+
+.c-lucky .name1,
+.c-lucky .name2,
+.c-lucky .name3 {
+	width: 100%;
+	height: 164px;
+	line-height: 164px;
+	position: absolute;
+
+}
+
+.c-lucky .name1 {
+	bottom: 164px;
+}
+
+.c-lucky .name2 {}
+
+.c-lucky .name3 {
+
+	top: 164px;
+}
+
+.isYou {
+	width: 400px;
+	position: absolute;
+	top: -15px;
+	left: -165px;
+	z-index: 999;
+}
